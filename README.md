@@ -1,4 +1,4 @@
-maestro.py
+﻿maestro.py
 ==========
 
 This Python class supports Pololu's Maestro servo controller over USB serial. Great for use with the Raspberry Pi.
@@ -23,3 +23,5 @@ Example usage of maestro.py:
     servo.setAccel(0,4)      #set servo 0 acceleration to 4
     servo.setTarget(0,6000)  #set servo to move to center position
     servo.close
+
+Enjoy!
