@@ -24,4 +24,3 @@ Example usage of maestro.py:
     servo.setTarget(0,6000)  #set servo to move to center position
     servo.close
 
-Enjoy!
