@@ -34,19 +34,43 @@ class Controller:
         # Track target position for each servo. The function isMoving() will
         # use the Target vs Current servo position to determine if movement is
         # occuring.  Upto 24 servos on a Maestro, (0-23). Targets start at 0.
-        self.Targets = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]        
-
+        self.Targets = [0] * 24
+        # Servo minimum and maximum targets can be restricted to protect components.
+        self.Mins = [0] * 24
+        self.Maxs = [0] * 24
+        
     # Cleanup by closing USB serial port
     def close(self):
         self.usb.close()
+
+    # Set channels min and max value range.  Use this as a safety to protect
+    # from accidentally moving outside known safe parameters. A setting of 0
+    # allows unrestricted movement.
+    def setRange(self, chan, min, max):
+        self.Mins[chan] = min
+        self.Maxs[chan] = max
+
+    # Return Minimum channel range value
+    def getMin(self, chan):
+        return self.Mins[chan]
+
+    # Return Minimum channel range value
+    def getMax(self, chan):
+        return self.Max[chan]
         
     # Set channel to a specified target value.  Servo will begin moving based
     # on Speed and Acceleration parameters previously set.
+    # Target values will be constrained within Min and Max range, if set.
     # For servos, target represents the pulse width in of quarter-microseconds
     # Servo center is at 1500 microseconds, or 6000 quarter-microseconds
     # Typcially valid servo range is 3000 to 9000 quarter-microseconds
     # If channel is configured for digital output, values < 6000 = Low ouput
     def setTarget(self, chan, target):
+        if self.Mins(chan) > 0 and target < self.Mins(chan):
+            target = self.Mins(chan)
+        if self.Maxs(chan) > 0 and target > self.Maxs(chan):
+            target = self.Maxs(chan)
+        #    
         lsb = target & 0x7f #7 bits for least significant byte
         msb = (target >> 7) & 0x7f #shift 7 and take next 7 bits for msb
         # Send Pololu intro, device number, command, channel, and target lsb/msb
