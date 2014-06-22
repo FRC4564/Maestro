@@ -28,7 +28,7 @@ class Controller:
     def __init__(self,port=0):
         # Open the command port
         ttyStr = '/dev/ttyACM' + str(port)
-        self.usb = serial.Serial('/dev/ttyACM0')
+        self.usb = serial.Serial(ttyStr)
         # Command lead-in and device 12 are sent for each Pololu serial commands.
         self.PololuCmd = chr(0xaa) + chr(0xc)
         # Track target position for each servo. The function isMoving() will
