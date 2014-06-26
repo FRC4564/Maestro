@@ -46,6 +46,10 @@ class Controller:
     # Set channels min and max value range.  Use this as a safety to protect
     # from accidentally moving outside known safe parameters. A setting of 0
     # allows unrestricted movement.
+    #
+    # ***Note that the Maestro itself is configured to limit the range of servo travel
+    # which has precedence over these values.  Use the Maestro Control Center to configure
+    # ranges that are saved to the controller.  Use setRange for software controllable ranges.
     def setRange(self, chan, min, max):
         self.Mins[chan] = min
         self.Maxs[chan] = max
@@ -66,10 +70,12 @@ class Controller:
     # Typcially valid servo range is 3000 to 9000 quarter-microseconds
     # If channel is configured for digital output, values < 6000 = Low ouput
     def setTarget(self, chan, target):
-        if self.Mins(chan) > 0 and target < self.Mins(chan):
-            target = self.Mins(chan)
-        if self.Maxs(chan) > 0 and target > self.Maxs(chan):
-            target = self.Maxs(chan)
+        # if Min is defined and Target is below, force to Min
+        if self.Mins[chan] > 0 and target < self.Mins[chan]:
+            target = self.Mins[chan]
+        # if Max is defined and Target is above, force to Max
+        if self.Maxs[chan] > 0 and target > self.Maxs[chan]:
+            target = self.Maxs[chan]
         #    
         lsb = target & 0x7f #7 bits for least significant byte
         msb = (target >> 7) & 0x7f #shift 7 and take next 7 bits for msb
@@ -119,12 +125,14 @@ class Controller:
     # Test to see if a servo has reached its target position.  This only provides
     # useful results if the Speed parameter is set slower than the maximum speed of
     # the servo. 
+    # ***Note if target position goes outside of Maestro's allowable range for the
+    # channel, then the target can never be reached, so it will appear to allows be
+    # moving to the target.  See setRange comment.
     def isMoving(self, chan):
         if self.Targets[chan] > 0:
-            if self.getPosition(self, chan) <> self.Targets[chan]:
+            if self.getPosition(chan) <> self.Targets[chan]:
                 return True
-        else:
-            return False
+        return False
     
     # Have all servo outputs reached their targets? This is useful only if Speed and/or
     # Acceleration have been set on one or more of the channels. Returns True or False.
