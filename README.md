@@ -9,10 +9,14 @@ Pololu's Maestro Windows installer sets up the Maestro Control Center, used to c
 
 You'll need to have the 'pyserial' Python module installed to use maestro.py.
 
-For Linux, download pyserial-2.6.tar.gz from http://sourceforge.net/projects/pyserial/files/pyserial/ and then install
+For Linux, download pyserial-2.7.tar.gz from http://sourceforge.net/projects/pyserial/files/pyserial/
 
-    tar –zxf pyserial-2.6.tar.gz
-    cd pyserial-2.6
+    wget http://sourceforge.net/projects/pyserial/files/pyserial/2.7/pyserial-2.7.tar.gz
+
+ and then install
+
+    tar –zxf pyserial-2.7.tar.gz
+    cd pyserial-2.7
     sudo python setup.py install
 
 
