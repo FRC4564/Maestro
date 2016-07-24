@@ -22,12 +22,10 @@ class Controller:
     # communication channel. Each connected device is then indexed by number.
     # This device number defaults to 0x0C (or 12 in decimal), which this module
     # assumes.  If two or more controllers are connected to different serial
-    # ports, then you can specify the port number when intiating a controller
-    # object. Ports will typically start at 0 and count by twos.  So with two
-    # controllers ports 0 and 2 would be used.
-    def __init__(self,port=0):
+    # ports, or you are using a Windows OS, you can provide the port name.  For
+    # example, '/dev/ttyACM2' or for Windows, something like 'COM3'.
+    def __init__(self,ttyStr='/dev/ttyACM0'):
         # Open the command port
-        ttyStr = '/dev/ttyACM' + str(port)
         self.usb = serial.Serial(ttyStr)
         # Command lead-in and device 12 are sent for each Pololu serial commands.
         self.PololuCmd = chr(0xaa) + chr(0xc)
@@ -58,9 +56,9 @@ class Controller:
     def getMin(self, chan):
         return self.Mins[chan]
 
-    # Return Minimum channel range value
+    # Return Maximum channel range value
     def getMax(self, chan):
-        return self.Max[chan]
+        return self.Maxs[chan]
         
     # Set channel to a specified target value.  Servo will begin moving based
     # on Speed and Acceleration parameters previously set.
@@ -149,7 +147,7 @@ class Controller:
     # Maestro subroutine to either infinitely loop, or just end (return is not valid).
     def runScriptSub(self, subNumber):
         cmd = self.PololuCmd + chr(0x27) + chr(subNumber)
-        # can pass a param with comman 0x28
+        # can pass a param with command 0x28
         # cmd = self.PololuCmd + chr(0x28) + chr(subNumber) + chr(lsb) + chr(msb)
         self.usb.write(cmd)
 
@@ -157,3 +155,4 @@ class Controller:
     def stopScript(self):
         cmd = self.PololuCmd + chr(0x24)
         self.usb.write(cmd)
+
