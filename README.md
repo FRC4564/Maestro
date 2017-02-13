@@ -5,7 +5,7 @@ This Python class supports Pololu's Maestro servo controller over USB serial. Gr
 
 The class includes methods to control servos (position, speed, acceleration), read servo position, and start/stop Maestro scripts.  See Pololu's on-line documentation to learn about the full capabilities of this nifty micro-controller.
 
-Pololu's Maestro Windows installer sets up the Maestro Control Center, used to configure, test and program the controller.  Be sure the Maestro is configured for "USB Dual Port" serial mode.  I believe the controller is setup in this mode by default by default, so it shouldn't be necessary to use the Control Center application.
+Pololu's Maestro Windows installer sets up the Maestro Control Center, used to configure, test and program the controller.  Be sure the Maestro is configured for "USB Dual Port" serial mode, which is [not the default](https://www.pololu.com/docs/0J40/3.c).
 
 You'll need to have the 'pyserial' Python module installed to use maestro.py.
 
