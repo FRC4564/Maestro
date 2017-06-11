@@ -19,6 +19,11 @@ For Linux, download pyserial-2.7.tar.gz from http://sourceforge.net/projects/pys
     cd pyserial-2.7
     sudo python setup.py install
 
+Alternatively, if you have pip available, pyserial can be installed as follows:
+
+    python -m pip install pyserial
+
+Check out http://pyserial.readthedocs.io/en/latest/pyserial.html#installation for other install options.
 
 Example usage of maestro.py:
 
@@ -28,3 +33,8 @@ Example usage of maestro.py:
     servo.setTarget(0,6000)  #set servo to move to center position
     servo.close
 
+For use on Windows, you'll need to provide the COM port assigned to the Maestro Command Port.  You can indentify the port by starting Device Manager and looking under Ports (COM & LPT).  Here's how to instantiate the controller for Windows.
+
+    import maestro.py
+    m = maestro.Controller('COM3')
+    
