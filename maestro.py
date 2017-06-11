@@ -1,4 +1,8 @@
 import serial
+from sys import version_info
+
+PY2 = version_info[0] == 2   #Running Python 2.x?
+
 #
 #---------------------------
 # Maestro Servo Controller
@@ -19,16 +23,16 @@ class Controller:
     # "USB Chained Mode" may work as well, but hasn't been tested.
     #
     # Pololu protocol allows for multiple Maestros to be connected to a single
-    # communication channel. Each connected device is then indexed by number.
+    # serial port. Each connected device is then indexed by number.
     # This device number defaults to 0x0C (or 12 in decimal), which this module
     # assumes.  If two or more controllers are connected to different serial
-    # ports, or you are using a Windows OS, you can provide the port name.  For
+    # ports, or you are using a Windows OS, you can provide the tty port.  For
     # example, '/dev/ttyACM2' or for Windows, something like 'COM3'.
-    def __init__(self,ttyStr='/dev/ttyACM0'):
+    def __init__(self,ttyStr='/dev/ttyACM0',device=0x0c):
         # Open the command port
         self.usb = serial.Serial(ttyStr)
-        # Command lead-in and device 12 are sent for each Pololu serial commands.
-        self.PololuCmd = chr(0xaa) + chr(0xc)
+        # Command lead-in and device number are sent for each Pololu serial command.
+        self.PololuCmd = chr(0xaa) + chr(device)
         # Track target position for each servo. The function isMoving() will
         # use the Target vs Current servo position to determine if movement is
         # occuring.  Upto 24 servos on a Maestro, (0-23). Targets start at 0.
@@ -40,6 +44,14 @@ class Controller:
     # Cleanup by closing USB serial port
     def close(self):
         self.usb.close()
+
+    # Send a Pololu command out the serial port
+    def sendCmd(self, cmd):
+        cmdStr = self.PololuCmd + cmd
+        if PY2:
+            self.usb.write(cmdStr)
+        else:
+            self.usb.write(bytes(cmdStr,'latin-1'))
 
     # Set channels min and max value range.  Use this as a safety to protect
     # from accidentally moving outside known safe parameters. A setting of 0
@@ -77,9 +89,8 @@ class Controller:
         #    
         lsb = target & 0x7f #7 bits for least significant byte
         msb = (target >> 7) & 0x7f #shift 7 and take next 7 bits for msb
-        # Send Pololu intro, device number, command, channel, and target lsb/msb
-        cmd = self.PololuCmd + chr(0x04) + chr(chan) + chr(lsb) + chr(msb)
-        self.usb.write(cmd)
+        cmd = chr(0x04) + chr(chan) + chr(lsb) + chr(msb)
+        self.sendCmd(cmd)
         # Record Target value
         self.Targets[chan] = target
         
@@ -91,9 +102,8 @@ class Controller:
     def setSpeed(self, chan, speed):
         lsb = speed & 0x7f #7 bits for least significant byte
         msb = (speed >> 7) & 0x7f #shift 7 and take next 7 bits for msb
-        # Send Pololu intro, device number, command, channel, speed lsb, speed msb
-        cmd = self.PololuCmd + chr(0x07) + chr(chan) + chr(lsb) + chr(msb)
-        self.usb.write(cmd)
+        cmd = chr(0x07) + chr(chan) + chr(lsb) + chr(msb)
+        self.sendCmd(cmd)
 
     # Set acceleration of channel
     # This provide soft starts and finishes when servo moves to target position.
@@ -102,9 +112,8 @@ class Controller:
     def setAccel(self, chan, accel):
         lsb = accel & 0x7f #7 bits for least significant byte
         msb = (accel >> 7) & 0x7f #shift 7 and take next 7 bits for msb
-        # Send Pololu intro, device number, command, channel, accel lsb, accel msb
-        cmd = self.PololuCmd + chr(0x09) + chr(chan) + chr(lsb) + chr(msb)
-        self.usb.write(cmd)
+        cmd = chr(0x09) + chr(chan) + chr(lsb) + chr(msb)
+        self.sendCmd(cmd)
     
     # Get the current position of the device on the specified channel
     # The result is returned in a measure of quarter-microseconds, which mirrors
@@ -114,29 +123,31 @@ class Controller:
     # the position result will align well with the acutal servo position, assuming
     # it is not stalled or slowed.
     def getPosition(self, chan):
-        cmd = self.PololuCmd + chr(0x10) + chr(chan)
-        self.usb.write(cmd)
+        cmd = chr(0x10) + chr(chan)
+        self.sendCmd(cmd)
         lsb = ord(self.usb.read())
         msb = ord(self.usb.read())
         return (msb << 8) + lsb
 
-    # Test to see if a servo has reached its target position.  This only provides
+    # Test to see if a servo has reached the set target position.  This only provides
     # useful results if the Speed parameter is set slower than the maximum speed of
-    # the servo. 
+    # the servo.  Servo range must be defined first using setRange. See setRange comment.
+    #
     # ***Note if target position goes outside of Maestro's allowable range for the
-    # channel, then the target can never be reached, so it will appear to allows be
-    # moving to the target.  See setRange comment.
+    # channel, then the target can never be reached, so it will appear to always be
+    # moving to the target.  
     def isMoving(self, chan):
         if self.Targets[chan] > 0:
-            if self.getPosition(chan) <> self.Targets[chan]:
+            if self.getPosition(chan) != self.Targets[chan]:
                 return True
         return False
     
     # Have all servo outputs reached their targets? This is useful only if Speed and/or
     # Acceleration have been set on one or more of the channels. Returns True or False.
+    # Not available with Micro Maestro.
     def getMovingState(self):
-        cmd = self.PololuCmd + chr(0x13)
-        self.usb.write(cmd)
+        cmd = chr(0x13)
+        self.sendCmd(cmd)
         if self.usb.read() == chr(0):
             return False
         else:
@@ -146,13 +157,13 @@ class Controller:
     # have multiple subroutines, which get numbered sequentially from 0 on up. Code your
     # Maestro subroutine to either infinitely loop, or just end (return is not valid).
     def runScriptSub(self, subNumber):
-        cmd = self.PololuCmd + chr(0x27) + chr(subNumber)
+        cmd = chr(0x27) + chr(subNumber)
         # can pass a param with command 0x28
-        # cmd = self.PololuCmd + chr(0x28) + chr(subNumber) + chr(lsb) + chr(msb)
-        self.usb.write(cmd)
+        # cmd = chr(0x28) + chr(subNumber) + chr(lsb) + chr(msb)
+        self.sendCmd(cmd)
 
     # Stop the current Maestro Script
     def stopScript(self):
-        cmd = self.PololuCmd + chr(0x24)
-        self.usb.write(cmd)
+        cmd = chr(0x24)
+        self.sendCmd(cmd)
 
