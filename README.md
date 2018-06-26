@@ -35,7 +35,10 @@ Example usage of maestro.py:
     servo = maestro.Controller()
     servo.setAccel(0,4)      #set servo 0 acceleration to 4
     servo.setTarget(0,6000)  #set servo to move to center position
-    servo.close
+    x = servo.getPosition(1) #get the current position of servo 1
+    servo.close()
+
+There are other methods provided by the module.  The code is well documented, if you'd like to learn more.
 
 For use on Windows, you'll need to provide the COM port assigned to the Maestro Command Port.  You can indentify the port by starting Device Manager and looking under Ports (COM & LPT).  Here's how to instantiate the controller for Windows.
 
