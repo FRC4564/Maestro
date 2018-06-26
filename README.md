@@ -25,6 +25,10 @@ Alternatively, if you have pip available, pyserial can be installed as follows:
 
 Check out http://pyserial.readthedocs.io/en/latest/pyserial.html#installation for other install options.
 
+To download the maestro.py module issue the following command:
+
+    wget https://raw.githubusercontent.com/FRC4564/maestro/master/maestro.py
+
 Example usage of maestro.py:
 
     import maestro.py
