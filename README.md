@@ -5,6 +5,8 @@ This Python class supports Pololu's Maestro servo controller over USB serial. Gr
 
 The class includes methods to control servos (position, speed, acceleration), read servo position, and start/stop Maestro scripts.  See Pololu's on-line documentation to learn about the full capabilities of this nifty micro-controller.
 
+## Setup
+
 Pololu's Maestro Windows installer sets up the Maestro Control Center, used to configure, test and program the controller.  Be sure the Maestro is configured for "USB Dual Port" serial mode, which is [not the default](https://www.pololu.com/docs/0J40/3.c).
 
 You'll need to have the 'pyserial' Python module installed to use maestro.py.
@@ -29,6 +31,8 @@ To download the maestro.py module issue the following command:
 
     wget https://raw.githubusercontent.com/FRC4564/maestro/master/maestro.py
 
+## How to Use
+
 Example usage of maestro.py:
 
     import maestro.py
@@ -45,3 +49,8 @@ For use on Windows, you'll need to provide the COM port assigned to the Maestro 
     import maestro.py
     m = maestro.Controller('COM3')
     
+## Going Further
+
+The Maestro series of controllers can support much more than just servo control.  The PWM-based protocol used to control servos is also compatibile with RC Electronic Speed Controllers (ESCs) to control motors power and direction.  There are many options avialbe for both brushed and brushless motors.  Beyond servo and motor control, the Maestros can also be used for digital I/O and support analog input.  The setTarget and getPosition methods support these extended features.  You do, however, need to use the Maestro Control Center and change the mode of individual channels from "servo" to either "input" or "output".  Read the Maestro documentation on how to properly use these special modes.
+
+Because of the many capabilities of the Maestro, it lends it self nicely to robotics.  If you're interested in some robotic applications check out [Basic PiBot](https://github.com/FRC4564/BasicPiBot).  Its a simple framework to get you started with making your own interactive or autonomous machines.  
