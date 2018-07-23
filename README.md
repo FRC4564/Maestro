@@ -1,7 +1,7 @@
 ﻿maestro.py
 ==========
 
-This Python class supports Pololu's Maestro servo controller over USB serial. Great for use with the Raspberry Pi.
+This Python class supports Pololu's Maestro servo controller over USB serial. Great for use with the Raspberry Pi, but works with Windows too.
 
 The class includes methods to control servos (position, speed, acceleration), read servo position, and start/stop Maestro scripts.  See Pololu's on-line documentation to learn about the full capabilities of this nifty micro-controller.
 
@@ -11,7 +11,15 @@ Pololu's Maestro Windows installer sets up the Maestro Control Center, used to c
 
 You'll need to have the 'pyserial' Python module installed to use maestro.py.
 
-For Linux, download pyserial-2.7.tar.gz from http://sourceforge.net/projects/pyserial/files/pyserial/
+If you have pip available, pyserial can be installed as follows:
+
+    python -m pip install pyserial
+    
+or, for python3
+
+    python3 -m pip install pyserial
+
+Alternatively, you can download pyserial-2.7.tar.gz from http://sourceforge.net/projects/pyserial/files/pyserial/
 
     wget http://sourceforge.net/projects/pyserial/files/pyserial/2.7/pyserial-2.7.tar.gz
 
@@ -20,10 +28,6 @@ For Linux, download pyserial-2.7.tar.gz from http://sourceforge.net/projects/pys
     tar –zxf pyserial-2.7.tar.gz
     cd pyserial-2.7
     sudo python setup.py install
-
-Alternatively, if you have pip available, pyserial can be installed as follows:
-
-    python -m pip install pyserial
 
 Check out http://pyserial.readthedocs.io/en/latest/pyserial.html#installation for other install options.
 
@@ -44,11 +48,19 @@ Example usage of maestro.py:
 
 There are other methods provided by the module.  The code is well documented, if you'd like to learn more.
 
-For use on Windows, you'll need to provide the COM port assigned to the Maestro Command Port.  You can indentify the port by starting Device Manager and looking under Ports (COM & LPT).  Here's how to instantiate the controller for Windows.
+For use on Windows, you'll need to provide the COM port assigned to the Maestro Command Port.  You can indentify the port by starting Device Manager and looking under Ports (COM & LPT).  Here's how to instantiate the controller for Windows for COM port 3.
 
     import maestro.py
     m = maestro.Controller('COM3')
     
+## Permission issue
+
+If you find that Linux complains about permissions trying to access the ttyACM device, just add your user to the 'dialout' group by issuing the following:
+
+    sudo adduser $USER dialout
+
+You'll need to reboot for the change to take effect.
+
 ## Going Further
 
 The Maestro series of controllers can support much more than just servo control.  The PWM-based protocol used to control servos is also compatibile with RC Electronic Speed Controllers (ESCs) to control motor power and direction.  There are many motor controller options available for both brushed and brushless motors.
